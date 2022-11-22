@@ -1,0 +1,85 @@
+- create database insurance1;
+use insurance1;
+create table person
+(driver_id char(10),
+name varchar(20),
+address varchar(10),
+primary key(driver_id)
+);
+show tables;
+desc person;
+create table car
+(reg_num char(10),
+model varchar(20),
+year year,
+primary key(reg_num)
+);
+desc car;
+create table owns
+(driver_id char(10),reg_num char(10),
+primary key(driver_id, reg_num),
+foreign key(driver_id) references person(driver_id)
+on delete cascade,
+foreign key(reg_num) references car(reg_num)
+on delete cascade);
+desc owns;
+create table accident
+(report_num char(10),
+accident_date date,
+location varchar(20),
+primary key(report_num)
+);
+desc accident;
+create table participated
+(driver_id char(10),
+reg_num char(10),
+report_num char(10),
+damage_amount int,
+primary key(driver_id, reg_num, report_num),
+foreign key(driver_id) references person(driver_id)
+on delete cascade,
+foreign key(reg_num) references car(reg_num)
+on delete cascade,
+foreign key(report_num) references accident(report_num)
+on delete cascade);
+desc participated;
+show tables;
+
+insert into person values( 2345, 'saki', 'banagalore'), ( 2346, 'ichika', 'mysore'), ( 2347, 'hona', 'banagalore'), ( 2348, 'shiho', 'mangalore');
+select * from person;
+insert into car values( 1000, 'honda', '2018'), ( 1001, 'benz', '2019'), ( 1002, 'suzuki', '2020'), ( 1003, 'nano', '2021');
+select * from car;
+insert into owns values( 2345, 1000), ( 2346, 1001), ( 2347, 1002), ( 2348, 1003);
+select * from owns;
+insert into accident values( 11, '2003-01-01', 'mysore road'), ( 12, '2003-02-02', 'south end circle'), ( 13, '2003-03-03', 'tumkur'), ( 14, '2003-04-04', 'ring road');
+select * from accident;
+insert into participated values( 2345, 1000, 11, 2000), ( 2346, 1001, 12, 3000), ( 2347, 1002, 13, 4000), ( 2348, 1003, 14, 5000);
+select * from participated;
+use insurance1;
+select * from car order by year asc;
+
+select count(report_num)
+from car c, participated p
+where c.reg_num = p.reg_num and c.model='benz';
+
+select count(distinct driver_id) cnt
+from participated a, accident b
+where a.report_num= b.report_num and b.accident_date like '__08%';
+
+select * from participated order by damage_amount desc;          
+select avg(damage_amount) from participated;
+select max(damage_amount) from participated;
+
+delete from participated where
+damage_amount <(select avg(damage_amount) from participated);
+
+select name from person a, participated b
+where a.driver_id=b.driver_id and damage_amount > (select avg(damage_amount) from participated);
+insert into accident values( 15, '2021-01-01', 'basavanagudi');
+select * from accident;
+
+select count(distinct report_num) cnt
+from accident
+where accident_date like '__21%'
+delete from participated where
+damage_amount <(select  t.d_amount from (select avg(damage_amount) as d_amount from participated) t);
